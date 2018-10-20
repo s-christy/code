@@ -13,6 +13,8 @@
 //finish the filter class
 //random vector field
 //turn everything to vectors
+//this really needs to be split into multiple files..
+//change the pixel colors to floats
 
 #include <algorithm>
 #include <iostream>
@@ -48,17 +50,21 @@ private:
 
 	//
 	class Filter{
-	float f[3][3];
+	float highPass[3][3]={
+		{0,-1,0},
+		{-1,4,-1},
+		{0,-1,0}
+	};
 	public:
-		Filter(){
-			//make a highpass filter
-			float t[3][3]={
-				{0,-1,0},
-				{-1,4,-1},
-				{0,-1,0}
-			};
-		}
-		void apply(){
+		Filter(){}
+		void apply(PixelBuffer *p){
+			std::vector<Pixel> backBuffer;
+			Pixel t;
+			for(unsigned int i=0;i<p->pixels.size();i++){
+				t=p->pixels[i];
+				backBuffer.push_back(Pixel(t.r,0,0,0));
+			}
+			p->pixels=backBuffer;
 		}
 	};
 
@@ -208,6 +214,8 @@ public:
 
 	//simple test of most of these functions
 	void featureTest(){
+		Filter f;
+		f.apply(this);
 		//fuzz();
 		//gradient();
 		//drawRect(300,400,10,10,0,0,255);
@@ -298,7 +306,7 @@ public:
 					row_pointers[y][x*4+0],
 					row_pointers[y][x*4+1],
 					row_pointers[y][x*4+2],
-					0
+					row_pointers[y][x*4+3]
 				));
 			}
 		}

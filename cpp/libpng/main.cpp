@@ -1,7 +1,7 @@
-//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng png.cpp ;./a.out resources/lion.png last.png;feh last.png ;rm a.out #last.png
-//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng png.cpp ;./a.out resources/text.png last.png;feh last.png ;rm a.out #last.png
-//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng png.cpp ;./a.out resources/Cats\ Eye.png last.png;feh last.png ;rm a.out #last.png
-//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng png.cpp ;./a.out resources/the\ office.png last.png;feh last.png ;rm a.out #last.png
+//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/lion.png last.png;feh last.png ;rm a.out #last.png
+//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/text.png last.png;feh last.png ;rm a.out #last.png
+//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/Cats\ Eye.png last.png;feh last.png ;rm a.out #last.png
+//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/the\ office.png last.png;feh last.png ;rm a.out #last.png
 
 //TODO
 //Experiment with video by slicing video into frames, processing each frame, and recompiling
@@ -63,8 +63,7 @@ private:
 	};
 
 	//Actual pixel buffer
-	Pixel *pixels;
-	Pixel *backBuffer;
+	std::vector<Pixel> pixels;
 
 	//set the color of pixel[x][y] to (r,g,b). Negative numbers make the channel transparent
 	void setPixel(int x, int y, Pixel p){
@@ -83,8 +82,7 @@ public:
 	PixelBuffer(int width, int height){
 		this->width=width;
 		this->height=height;
-		pixels=new Pixel[width*height];
-		backBuffer=new Pixel[width*height];
+		for(int i=0;i<width*height;i++)pixels.push_back(Pixel());
 	}
 
 	//return pixel information
@@ -210,20 +208,20 @@ public:
 
 	//simple test of most of these functions
 	void featureTest(){
-		fuzz();
-		gradient();
-		drawRect(300,400,10,10,0,0,255);
-		drawRect(100,100,100,10,0,0,255);
-		drawRect(100,200,150,150,-1,-1,255);
-		for(int i=0;i<height/2;i++)sort(height/2+i);
-		aberration(30);
-		rotateChannels();
-		blur(100);
-		broken1();
-		broken2();
-		sobelLike();
-		modulateBrightness();
-		broken3();
+		//fuzz();
+		//gradient();
+		//drawRect(300,400,10,10,0,0,255);
+		//drawRect(100,100,100,10,0,0,255);
+		//drawRect(100,200,150,150,-1,-1,255);
+		//for(int i=0;i<height/2;i++)sort(height/2+i);
+		//aberration(30);
+		//rotateChannels();
+		//blur(100);
+		//broken1();
+		//broken2();
+		//sobelLike();
+		//modulateBrightness();
+		//broken3();
 	}
 
 	//write pixel buffer to file
@@ -263,8 +261,6 @@ public:
 
 		width=png_get_image_width(png,info);
 		height=png_get_image_height(png,info);
-		pixels=new Pixel[width*height];
-		backBuffer=new Pixel[width*height];
 		png_byte color_type=png_get_color_type(png,info);
 		png_byte bit_depth	=png_get_bit_depth(png,info);
 
@@ -298,7 +294,7 @@ public:
 		fclose(fp);
 		for(int y=0;y<height;y++){
 			for(int x=0;x<width;x++){
-				setPixel(x,y,Pixel(
+				pixels.push_back(Pixel(
 					row_pointers[y][x*4+0],
 					row_pointers[y][x*4+1],
 					row_pointers[y][x*4+2],

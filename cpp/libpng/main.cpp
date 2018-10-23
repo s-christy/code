@@ -9,10 +9,7 @@
 //rotate hue
 //modulate colors by lumosity
 //do a fourier transform, at least a 1-d
-//experiment with actual 3x3 filters. Actually create a filter object that holds the filter and the width/height stuff as well
-//finish the filter class
 //random vector field
-//turn everything to vectors
 //this really needs to be split into multiple files..
 //change the pixel colors to floats
 //put several images in a collage so you can easily see what vertain effects do to all of them
@@ -89,6 +86,9 @@ private:
 				backBuffer.push_back(t);
 			}
 			p->pixels=backBuffer;
+		}
+		void scale(PixelBuffer *p,float scale){
+			apply(p,identity,1/scale);
 		}
 	};
 
@@ -263,7 +263,8 @@ public:
 
 	//simple test of most of these functions
 	void featureTest(){
-		//Filter f;
+		Filter f;
+		//f.scale(this,.2);
 		//f.apply(this,f.highPass);
 		//f.apply(this,f.blur,9);
 		//broken4(this);

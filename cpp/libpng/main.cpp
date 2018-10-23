@@ -1,7 +1,7 @@
+//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/the\ office.png last.png;feh last.png ;rm a.out #last.png
 //for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/lion.png last.png;feh last.png ;rm a.out #last.png
 //for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/text.png last.png;feh last.png ;rm a.out #last.png
 //for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/Cats\ Eye.png last.png;feh last.png ;rm a.out #last.png
-//for i in {0..100}; do echo; done;g++ -Wall -lm -lpng main.cpp ;./a.out resources/the\ office.png last.png;feh last.png ;rm a.out #last.png
 
 //TODO
 //Experiment with video by slicing video into frames, processing each frame, and recompiling
@@ -15,6 +15,8 @@
 //turn everything to vectors
 //this really needs to be split into multiple files..
 //change the pixel colors to floats
+//put several images in a collage so you can easily see what vertain effects do to all of them
+//make a waterfall effect where every pixel below the darkest pixels in a column are the same color as that darkest pixel
 
 #include <algorithm>
 #include <iostream>
@@ -32,10 +34,7 @@ private:
 	public:
 		int r,g,b,a;
 		Pixel(){
-			this->r=0;
-			this->g=0;
-			this->b=0;
-			this->a=0;
+			r=g=b=a=0;
 		}
 		Pixel(int r,int g,int b,int a){
 			this->r=r;
@@ -48,21 +47,46 @@ private:
 		}
 	};
 
-	//
+	//has a variety of filters that can be applied to an image
 	class Filter{
-	float highPass[3][3]={
-		{0,-1,0},
-		{-1,4,-1},
-		{0,-1,0}
-	};
 	public:
+		float highPass[3][3]={
+			{0,-1,0},
+			{-1,4,-1},
+			{0,-1,0}
+		};
+		float identity[3][3]={
+			{0,0,0},
+			{0,1,0},
+			{0,0,0}
+		};
+		float blur[3][3]={
+			{1,1,1},
+			{1,1,1},
+			{1,1,1}
+		};
 		Filter(){}
-		void apply(PixelBuffer *p){
+		void apply(PixelBuffer *p,float mask[][3]){
 			std::vector<Pixel> backBuffer;
-			Pixel t;
-			for(unsigned int i=0;i<p->pixels.size();i++){
-				t=p->pixels[i];
-				backBuffer.push_back(Pixel(t.r,0,0,0));
+			for(unsigned int i=1+p->width;i<p->pixels.size()-p->width-1;i++){
+				Pixel t;
+				for(int x=0;x<3;x++){
+					for(int y=0;y<3;y++){
+						t.r+=p->pixels[i+x-1+p->width*(y-1)].r*mask[x][y];
+						t.g+=p->pixels[i+x-1+p->width*(y-1)].g*mask[x][y];
+						t.b+=p->pixels[i+x-1+p->width*(y-1)].b*mask[x][y];
+					}
+				}
+				t.r/=9;
+				t.g/=9;
+				t.b/=9;
+				if(t.r>255)t.r=255;
+				if(t.g>255)t.g=255;
+				if(t.b>255)t.b=255;
+				if(t.r<0)t.r=0;
+				if(t.g<0)t.g=0;
+				if(t.b<0)t.b=0;
+				backBuffer.push_back(t);
 			}
 			p->pixels=backBuffer;
 		}
@@ -191,6 +215,31 @@ public:
 		}
 	}
 
+	void broken4(PixelBuffer *p){
+		float highPass[3][3]={
+			{0,-1,0},
+			{-1,2,-1},
+			{0,-1,0}
+		};
+		std::vector<Pixel> backBuffer;
+		for(unsigned int i=1;i<p->pixels.size()-p->width-1;i++){
+			Pixel t;
+			for(int x=0;x<3;x++){
+				t.r+=p->pixels[i+x-1].r*highPass[x][1];
+				t.g+=p->pixels[i+x-1].g*highPass[x][1];
+				t.b+=p->pixels[i+x-1].b*highPass[x][1];
+				if(t.r>255)t.r=255;
+				if(t.g>255)t.g=255;
+				if(t.b>255)t.b=255;
+				if(t.r<0)t.r=0;
+				if(t.g<0)t.g=0;
+				if(t.b<0)t.b=0;
+			}
+			backBuffer.push_back(t);
+		}
+		p->pixels=backBuffer;
+	}
+
 	//sobel-like filter
 	void sobelLike(){
 		for(int i=0;i<width*height;i++){
@@ -215,7 +264,9 @@ public:
 	//simple test of most of these functions
 	void featureTest(){
 		Filter f;
-		f.apply(this);
+		//f.apply(this,f.highPass);
+		f.apply(this,f.blur);
+		//broken4(this);
 		//fuzz();
 		//gradient();
 		//drawRect(300,400,10,10,0,0,255);

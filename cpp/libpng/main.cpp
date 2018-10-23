@@ -66,7 +66,7 @@ private:
 			{1,1,1}
 		};
 		Filter(){}
-		void apply(PixelBuffer *p,float mask[][3]){
+		void apply(PixelBuffer *p,float mask[][3],float scale=1.){
 			std::vector<Pixel> backBuffer;
 			for(unsigned int i=1+p->width;i<p->pixels.size()-p->width-1;i++){
 				Pixel t;
@@ -77,9 +77,9 @@ private:
 						t.b+=p->pixels[i+x-1+p->width*(y-1)].b*mask[x][y];
 					}
 				}
-				t.r/=9;
-				t.g/=9;
-				t.b/=9;
+				t.r/=scale;
+				t.g/=scale;
+				t.b/=scale;
 				if(t.r>255)t.r=255;
 				if(t.g>255)t.g=255;
 				if(t.b>255)t.b=255;
@@ -263,9 +263,9 @@ public:
 
 	//simple test of most of these functions
 	void featureTest(){
-		Filter f;
+		//Filter f;
 		//f.apply(this,f.highPass);
-		f.apply(this,f.blur);
+		//f.apply(this,f.blur,9);
 		//broken4(this);
 		//fuzz();
 		//gradient();

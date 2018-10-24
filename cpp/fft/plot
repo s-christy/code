@@ -1,0 +1,2 @@
+plot "f1" with lines, "f2" with lines
+pause -1

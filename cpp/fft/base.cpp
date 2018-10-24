@@ -1,11 +1,8 @@
-//g++ -lfftw3 -lm main.cpp;echo>f1;echo>f2;./a.out;rm a.out;gnuplot plot; rm f1 f2
-
-//TODO
-//vectorize all of these arrays
+//g++ -lfftw3 -lm base.cpp;echo>f1;echo>f2;./a.out;rm a.out;gnuplot plot; rm f1 f2
 
 #include <fftw3.h>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <math.h>
 
 int N=1000;

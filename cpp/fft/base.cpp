@@ -16,7 +16,11 @@ int main(){
 	fftw_plan p=fftw_plan_dft_1d(N,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
 
 	//put the output of the sin function in the input array
-	for(int i=0;i<N;i++)in[i][0]=sin(i);
+	//for(int i=0;i<N;i++)for(int j=1;j<6;j++)in[i][0]+=sin(i/j);
+	//for(int i=0;i<N;i++)in[i][0]=abs(i-N/2);
+	//for(int i=0;i<N;i++)in[i][0]=sin(i);
+	//for(int i=0;i<N;i++)in[i][0]=tan(i);
+	for(int i=N/4;i<N/4+100;i++)in[i][0]=sin(i);
 
 	//save the input
 	std::ofstream f1("f1");

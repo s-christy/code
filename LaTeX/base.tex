@@ -1,0 +1,38 @@
+% pdflatex base.tex
+% zathura base.pdf &
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[margin=1in]{geometry}
+
+\title{Title}
+\author{Sam Christy}
+
+\begin{document}
+\maketitle
+\section{This is the first section}
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{boat.jpg}
+     \caption{Coffee.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{boat.jpg}
+    \caption{More boat.}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{boat.jpg}
+     \caption{Coffee.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{boat.jpg}
+    \caption{More boat.}
+  \end{subfigure}
+\end{figure}
+
+\subsection{This is the first subsection}
+This is the text
+\end{document}

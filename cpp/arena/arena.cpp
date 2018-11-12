@@ -5,27 +5,32 @@
 class Fighter{
 public:
 	int health=100;
-	char* name="Base";
+	virtual char const * name(){return "Base";}
 	virtual int bid(){return 0;}
 };
 
 class Bot1: public Fighter{
 public:
-	char* name="Bot1";
+	char const * name(){return "Bot1";}
 	int bid(){return 1;}
 };
 
 class Dummy: public Fighter{
 public:
-	char* name="Dummy";
+	char const * name(){return "Dummy";}
 	int bid(){return 0;}
 };
 
 class Rando: public Fighter{
 public:
-	char* name="Rando";
+	char const * name(){return "Rando";}
 	int bid(){return rand()%health-1;}
 };
+
+//stubborn picks a value and sticks with it
+//TheFullHalfie
+//OnePunch
+//
 
 Fighter *randomFighter(){
 	int choice=rand()%3;
@@ -34,7 +39,7 @@ Fighter *randomFighter(){
 		case 1: return new Dummy;
 		case 2: return new Rando;
 	}
-	return new Bot1();
+	return new Fighter;
 }
 
 void fight(Fighter* a,Fighter* b){
@@ -51,12 +56,12 @@ void fight(Fighter* a,Fighter* b){
 		b->health-=1;
 	}
 	std::cout
-<<a->name<<' '
+<<a->name()<<' '
 <<bid1<<' '
 <<a->health<<'\n';
 
 	std::cout
-<<b->name<<' '
+<<b->name()<<' '
 <<bid2<<' '
 <<b->health<<'\n';
 }
@@ -65,12 +70,12 @@ int main(){
 	srand(time(0));
 	Fighter *a=randomFighter();
 	Fighter *b=randomFighter();
-	fight(a,b);
-	std::cout<<randomFighter()->name<<'\n';
-	std::cout<<randomFighter()->name<<'\n';
-	std::cout<<randomFighter()->name<<'\n';
-	std::cout<<randomFighter()->name<<'\n';
-	std::cout<<randomFighter()->name<<'\n';
+	for(int i=0;i<105;i++){
+		fight(a,b);
+		if(a->health<0)a=randomFighter();
+		if(b->health<0)b=randomFighter();
+		std::cout<<'\n';
+	}
 }
 
 

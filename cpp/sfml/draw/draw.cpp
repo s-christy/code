@@ -1,4 +1,4 @@
-//g++ draw.cpp -lsfml-graphics -lsfml-window -lsfml-system;./a.out;rm a.out
+//for i in {1..10};do echo;done;g++ draw.cpp -lsfml-graphics -lsfml-window -lsfml-system;./a.out;rm a.out
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
@@ -19,14 +19,40 @@
 
 class Layer{
 public:
-Layer(){
+int x,y;
+sf::Texture image;
+sf::Sprite sprite;
+Layer(int x, int y){
+	this->x=x;
+	this->y=y;
+
 	sf::RenderTexture layer;
 	layer.create(WIDTH,HEIGHT);
-	sf::Texture image;
 	image.loadFromFile("test.jpg");
-	sf::Sprite sprite;
 	sprite.setTexture(image);
-	sprite.move(299,62);
+	sprite.move(x,y);
+}
+sf::Sprite getSprite(){
+	return sprite;
+}
+};
+
+class DrawLayer{
+public:
+sf::Sprite sprite;
+int x,y;
+sf::RenderTexture layer;
+DrawLayer(int x=0, int y=0){
+	this->x=x;
+	this->y=y;
+	layer.create(WIDTH,HEIGHT);
+}
+sf::Sprite getSprite(){
+	layer.display();
+	const sf::Texture& texture=layer.getTexture();
+	sprite=sf::Sprite(texture);
+	sprite.setPosition(x,y);
+	return sprite;
 }
 };
 
@@ -37,16 +63,10 @@ int main(){
 	window.setFramerateLimit(60);
 	sf::Vector2i lastMouseXY=sf::Mouse::getPosition(window);
 
-	//Create a layer to be rendered on top of the window.
-	sf::RenderTexture layer;
-	layer.create(WIDTH,HEIGHT);
+	Layer backLayer(299,62);
 
-	//Create the image layer
-	sf::Texture image;
-	image.loadFromFile("test.jpg");
-	sf::Sprite sprite;
-	sprite.setTexture(image);
-	sprite.move(299,62);
+	//Create a layer to be rendered on top of the window.
+	DrawLayer frontLayer;
 
 	//Create the pen sprite
 	sf::RenderTexture pen;
@@ -77,16 +97,21 @@ int main(){
 		//handle mouse events
 		if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
 			sf::Vector2i mouseXY=sf::Mouse::getPosition(window);
-			if(mouseXY.x!=lastMouseXY.x or mouseXY.y!=lastMouseXY.y)
-				drawLine(lastMouseXY,mouseXY,1,layer,penSprite);
+			if(mouseXY.x!=lastMouseXY.x or mouseXY.y!=lastMouseXY.y){
+				sf::Vector2i a=sf::Vector2i(mouseXY.x-frontLayer.x,mouseXY.y-frontLayer.y);
+				sf::Vector2i b=sf::Vector2i(lastMouseXY.x-frontLayer.x,lastMouseXY.y-frontLayer.y);
+				drawLine(a,b,1,frontLayer.layer,penSprite);
+			}
 			lastMouseXY=mouseXY;
 		}else if(sf::Mouse::isButtonPressed(sf::Mouse::Right)){
 			sf::Vector2i mouseXY=sf::Mouse::getPosition(window);
 			float dx=mouseXY.x-lastMouseXY.x;
 			float dy=mouseXY.y-lastMouseXY.y;
-			sprite.move(dx,dy);
-			std::cout<<sprite.getPosition().x<<' ';
-			std::cout<<sprite.getPosition().y<<'\n';
+			backLayer.sprite.move(dx,dy);
+			frontLayer.x+=dx;
+			frontLayer.y+=dy;
+			//std::cout<<backLayer.sprite.getPosition().x<<' ';
+			//std::cout<<backLayer.sprite.getPosition().y<<'\n';
 			lastMouseXY=mouseXY;
 		}else{
 			sf::Vector2i mouseXY=sf::Mouse::getPosition(window);
@@ -96,17 +121,12 @@ int main(){
 		//Handle keyboard events
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q))exit(0);
 
-		//Draw to the layer
-		layer.display();
-		const sf::Texture& texture=layer.getTexture();
-		sf::Sprite layer(texture);
-
 		//Draw to the window
 		window.clear(sf::Color::White);
 
-		window.draw(sprite);
+		window.draw(backLayer.getSprite());
+		window.draw(frontLayer.getSprite());
 
-		window.draw(layer);
 		window.display();
 	}
 

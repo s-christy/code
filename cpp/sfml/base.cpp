@@ -12,6 +12,8 @@
  * TODO:
  * Draw the user's brush strokes to a "layer" buffer using CircleShapes,
  * destroy the CircleShapes, but save the buffer and draw it to the screen.
+ * On each change, a buffer should be created so that the user can o back to
+ * previous buffers when they want to undo things.
  *
  */
 
@@ -77,9 +79,9 @@ int main(){
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))shape.move(0,-speed);
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))shape.move(0,speed);
 		if(event.key.code=='q')exit(0);
-		if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
 
-			//Update the text
+		//Update the text
+		if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
 			text.setString("[ "+
 				std::to_string(sf::Mouse::getPosition(window).x)+", "+
 				std::to_string(sf::Mouse::getPosition(window).y)+" ]"

@@ -4,9 +4,9 @@
 #include <math.h>
 #include <string>
 
-#include "layer.h"
+#include "layer.hpp"
 #include "line.hpp"
-#include "pen.h"
+#include "pen.hpp"
 
 /*
  *

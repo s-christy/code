@@ -1,0 +1,33 @@
+void printRegs(struct user_regs_struct regs){
+	printf("------------------------\n");
+	printf("cs       | %016llx-Should be unused in x86-64\n",regs.cs);
+	printf("ds       | %016llx\n",regs.ds);
+	printf("eflags   | %016llx\n",regs.eflags);
+	printf("es       | %016llx\n",regs.es);
+	printf("fs       | %016llx\n",regs.fs);
+	printf("fs_base  | %016llx\n",regs.fs_base);
+	printf("gs       | %016llx\n",regs.gs);
+	printf("gs_base  | %016llx\n",regs.gs_base);
+	printf("orig_rax | %016llx\n",regs.orig_rax);
+	printf("ss       | %016llx-Should be unused in x86-64\n",regs.ss);
+	printf("\n");
+	printf("r8       | %016llx\n",regs.r8);
+	printf("r9       | %016llx\n",regs.r9);
+	printf("r10      | %016llx\n",regs.r10);
+	printf("r11      | %016llx\n",regs.r11);
+	printf("r12      | %016llx\n",regs.r12);
+	printf("r13      | %016llx\n",regs.r13);
+	printf("r14      | %016llx\n",regs.r14);
+	printf("r15      | %016llx\n",regs.r15);
+	printf("\n");
+	printf("rax      | %016llx\n",regs.rax);
+	printf("rbp      | %016llx\n",regs.rbp);
+	printf("rbx      | %016llx\n", regs.rbx);
+	printf("rbx      | %016llx\n",regs.rbx);
+	printf("rcx      | %016llx\n",regs.rcx);
+	printf("rdi      | %016llx-Destination Index\n",regs.rdi);
+	printf("rdx      | %016llx\n",regs.rdx);
+	printf("rip      | %016llx-Instruction Pointer\n",regs.rip);
+	printf("rsi      | %016llx-Source Index\n",regs.rsi);
+	printf("rsp      | %016llx-Stack Pointer\n",regs.rsp);
+}

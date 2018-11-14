@@ -1,3 +1,5 @@
+
+//object for building a variety of pen types
 class Pen{
 public:
 sf::Sprite penSprite;
@@ -19,3 +21,4 @@ Pen(int brushWidth,sf::Color color){
 	);
 }
 };
+

@@ -23,20 +23,20 @@ sf::Vector2i next;
 
 int main(){
 
-	//Init window
+	//init window
 	sf::RenderWindow window(sf::VideoMode(WIDTH,HEIGHT),"Title");
 	window.setFramerateLimit(60);
 	Mouse mouse;
 	mouse.prev=sf::Mouse::getPosition(window);
 
-	//Create the layers
+	//create the layers
 	Layer backLayer(299,62,"test.jpg");
 	Layer frontLayer;
 
-	//Create the pen sprite
+	//create the pen sprite
 	Pen pen(200,sf::Color(50,50,50,5));
 
-	//Main loop
+	//main loop
 	while (window.isOpen()){
 		sf::Event event;
 		while (window.pollEvent(event)){
@@ -47,12 +47,16 @@ int main(){
 
 		//handle mouse events
 		mouse.next=sf::Mouse::getPosition(window);
+
+		//when the LMB is pressed, draw with the pen object
 		if(sf::Mouse::isButtonPressed(sf::Mouse::Left)){
 			if(mouse.next.x!=mouse.prev.x or mouse.next.y!=mouse.prev.y){
 				sf::Vector2i a=sf::Vector2i(mouse.next.x-frontLayer.x,mouse.next.y-frontLayer.y);
 				sf::Vector2i b=sf::Vector2i(mouse.prev.x-frontLayer.x,mouse.prev.y-frontLayer.y);
 				drawLine(a,b,1,frontLayer.layer,pen.penSprite);
 			}
+
+		//when the LMB is pressed, pan the layers
 		}else if(sf::Mouse::isButtonPressed(sf::Mouse::Right)){
 			float dx=mouse.next.x-mouse.prev.x;
 			float dy=mouse.next.y-mouse.prev.y;
@@ -62,12 +66,13 @@ int main(){
 		}
 		mouse.prev=mouse.next;
 
-		//Handle keyboard events
+		//handle keyboard events
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q))exit(0);
 
-		//Draw to the window
+		//draw to the window
 		window.clear(sf::Color::White);
 
+		//draw the layers
 		window.draw(backLayer.getSprite());
 		window.draw(frontLayer.getSprite());
 

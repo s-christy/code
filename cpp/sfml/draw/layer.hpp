@@ -1,6 +1,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
+//object for creating, manipulating, and displaying layers
 class Layer{
 public:
 int x,y;
@@ -9,7 +10,7 @@ sf::Sprite sprite;
 sf::RenderTexture layer;
 bool isImage=false;
 
-Layer(int x=0, int y=0,std::string filename=""){
+Layer(int x=0,int y=0,std::string filename=""){
 	this->x=x;
 	this->y=y;
 	layer.create(WIDTH,HEIGHT);
@@ -36,3 +37,4 @@ void move(int dx,int dy){
 	y+=dy;
 }
 };
+

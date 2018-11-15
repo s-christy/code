@@ -2,40 +2,14 @@
 
 #include <algorithm>
 #include <iostream>
-#include <sys/ptrace.h>
-#include <sys/types.h>
 #include <signal.h>
+#include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>
 #include <vector>
-#include <unistd.h>
 
 #include "printRegs.hpp"
 #include "queryProc.hpp"
-
-void sendsig(std::string s,int signal){
-	int pid=queryProc(s);
-	std::cout<<pid<<' ';
-	if(pid!=-1)kill(pid,signal);
-}
-
-std::vector<std::pair<unsigned long,unsigned long>> readProc(int pid){
-	std::vector<std::pair<unsigned long,unsigned long>> ret;
-	std::string fname="/proc/"+std::to_string(pid)+"/maps";
-	std::string s;
-	std::ifstream f(fname);
-	while(f>>s){
-		if(s.length()==25){
-			int dash=s.find("-")+1;
-			unsigned long a,b;
-			a=strtol(s.c_str(),0,16);
-			b=strtol(s.c_str()+dash,0,16);
-			ret.push_back(std::pair<unsigned long, unsigned long>(a,b));
-			std::cout<<std::hex<<a<<'-'<<b<<'\n';
-		}
-	}
-	return ret;
-}
 
 std::vector<unsigned long> getHits(
 		int target,
@@ -91,49 +65,99 @@ std::vector<unsigned long> vectorUnion(
 		b.begin(),b.end(),
 		std::back_inserter(both)
 	);
-	//std::cout<<"Union is:\n";
-	//for(int i=0;i<both.size();i++){
-	//	std::cout<<both[i]<<'\n';
-	//}
-	//std::cout<<"End union.\n";
 	return both;
 }
 
+std::vector<unsigned int> snapshot(int pid,std::vector<std::pair<unsigned long,unsigned long>> addresses){
+	std::vector<unsigned int> ret;
+	int len=0;
+	for(int i=0;i<addresses.size();i++){
+		len+=addresses[0].second-addresses[0].first;
+	}
+	ret=std::vector<unsigned int>(len);
+	unsigned long index=0;
+	for(int j=0;j<addresses.size();j++){
+		for(unsigned long i=addresses[j].first;i<addresses[j].second;i++){
+			ret[index]=ptrace(PTRACE_PEEKDATA,pid,i,NULL);
+			index++;
+		}
+	}
+	return ret;
+}
+
+void different(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<unsigned long,unsigned long>>& addresses){
+	std::vector<unsigned int> snap2=snapshot(pid,addresses);
+
+	for(int i=0;i<snap.size();i++){
+		if(snap[i]==snap2[i]){
+			snap[i]=0;
+		}
+		if(snap[i]!=0){
+			std::cout<<snap[i]<<'\t'<<snap2[i]<<'\n';
+		}
+	}
+}
+
+void same(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<unsigned long,unsigned long>>& addresses){
+	std::vector<unsigned int> snap2=snapshot(pid,addresses);
+
+	for(int i=0;i<snap.size();i++){
+		if(snap[i]!=snap2[i]){
+			snap[i]=0;
+		}
+		if(snap[i]!=0){
+			std::cout<<snap[i]<<'\t'<<snap2[i]<<'\n';
+		}
+	}
+}
+
 int main(){
-	int pid=queryProc("a.out");
+	//std::string procName="Risk_of_Rain";
+	std::string procName="a.out";
+	int pid=queryProc(procName);
 	if(pid==-1)return -1;
 
-	sendsig("a.out",SIGCONT);
+	kill(pid,SIGCONT);
 
 
 
 	attach(pid);
 
 	std::vector<std::pair<unsigned long,unsigned long>> addresses=readProc(pid);
+	std::vector<unsigned int> snap=snapshot(pid,addresses);
 
 	std::vector<unsigned long> total;
 	while(1){
 		char option;
 		std::cout<<"Enter option: ";
 		std::cin>>std::dec>>option;
-		if(option=='q'){
+		if(option=='q'){//quit
 			break;
-		}else if(option=='d'){
-			detach(pid);
-		}else if(option=='k'){
+		}else if(option=='k'){//kill process
 			kill(pid,SIGKILL);
 			exit(0);
-		}else if(option=='a'){
+		}else if(option=='s'){//same
+			same(snap,pid,addresses);
+		}else if(option=='i'){//different
+			different(snap,pid,addresses);
+		}else if(option=='a'){//attach
 			attach(pid);
-		}else if(option=='p'){
+		}else if(option=='d'){//detach
+			detach(pid);
+		}else if(option=='p'){//poke
 			unsigned long addr=0;
 			std::cout<<"Enter address: ";
 			std::cin>>std::hex>>addr;
 			unsigned long nval=0;
 			std::cout<<"Enter new value: ";
 			std::cin>>std::dec>>nval;
-			ptrace(PTRACE_POKEDATA,pid,addr,nval);
-		}else if(option=='t'){
+			if(addr==0){
+				for(int i=0;i<total.size();i++)
+					ptrace(PTRACE_POKEDATA,pid,total[i],nval);
+			}else{
+				ptrace(PTRACE_POKEDATA,pid,addr,nval);
+			}
+		}else if(option=='t'){//find target
 			int target;
 			std::cout<<"Enter target: ";
 			std::cin>>std::dec>>target;
@@ -147,24 +171,21 @@ int main(){
 			for(int i=0;i<total.size();i++){
 				std::cout<<std::hex<<total[i]<<'\n';
 			}
+			std::cout<<total.size()<<'\n';
+
+
 		}
+		int count=0;
+		for(int i=0;i<snap.size();i++)
+			if(snap[i]!=0)
+				count++;
+		std::cout<<count<<'\n';
 	}
 
 
-	//std::vector <unsigned long> both;
-	//for(int i=0;i<a.size();i++){
-	//	for(int j=0;j<b.size();j++){
-
-	//	}
-	//}
-
-	//struct user_regs_struct regs;
-	//printRegs(regs);
-	//if(ptrace(PTRACE_SINGLESTEP,pid,NULL,NULL)==-1)perror("STEP ERROR");
 
 	detach(pid);
 
-	//sendsig("a.out",SIGKILL);
 
 }
 

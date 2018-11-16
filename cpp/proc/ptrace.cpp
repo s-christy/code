@@ -80,6 +80,7 @@ std::vector<unsigned int> snapshot(int pid,std::vector<std::pair<unsigned long,u
 		for(unsigned long i=addresses[j].first;i<addresses[j].second;i++){
 			ret[index]=ptrace(PTRACE_PEEKDATA,pid,i,NULL);
 			index++;
+			if(index%100==0)std::cout<<(float)index/(float)len<<'\n';
 		}
 	}
 	return ret;
@@ -89,8 +90,10 @@ void different(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<uns
 	std::vector<unsigned int> snap2=snapshot(pid,addresses);
 
 	for(int i=0;i<snap.size();i++){
-		if(snap[i]==snap2[i]){
+		if(snap[i]==snap2[i] or snap[i]==0){
 			snap[i]=0;
+		}else{
+			snap[i]=snap2[i];
 		}
 		if(snap[i]!=0){
 			std::cout<<snap[i]<<'\t'<<snap2[i]<<'\n';
@@ -113,11 +116,13 @@ void same(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<unsigned
 
 int main(){
 	//std::string procName="Risk_of_Rain";
-	std::string procName="a.out";
+	//std::string procName="a.out";
+	std::string procName="deadcells";
 	int pid=queryProc(procName);
 	if(pid==-1)return -1;
 
 	kill(pid,SIGCONT);
+	//exit(0);
 
 
 
@@ -129,7 +134,7 @@ int main(){
 	std::vector<unsigned long> total;
 	while(1){
 		char option;
-		std::cout<<"Enter option: ";
+		std::cout<<"[s]ame\td[i]fferent\t[a]ttach\t[d]etach\t[p]oke\n";
 		std::cin>>std::dec>>option;
 		if(option=='q'){//quit
 			break;

@@ -21,13 +21,14 @@ int queryProc(std::string search,bool silent=true){
 	return pid;
 }
 
-std::vector<std::pair<unsigned long,unsigned long>> readProc(int pid){
+std::vector<std::pair<unsigned long,unsigned long>> readProc(int pid,bool quiet=false,bool all=false){
 	std::vector<std::pair<unsigned long,unsigned long>> ret;
 	std::string fname="/proc/"+std::to_string(pid)+"/maps";
 	std::string s;
 	std::ifstream f(fname);
 	while(std::getline(f,s)){
 		if(
+			all or
 			s.find("heap")!=std::string::npos or
 			s.find("stack")!=std::string::npos){
 
@@ -36,7 +37,7 @@ std::vector<std::pair<unsigned long,unsigned long>> readProc(int pid){
 			a=strtol(s.c_str(),0,16);
 			b=strtol(s.c_str()+dash,0,16);
 			ret.push_back(std::pair<unsigned long, unsigned long>(a,b));
-			std::cout<<s<<'\n';
+			if(!quiet)std::cout<<s<<'\n';
 		}
 	}
 	return ret;

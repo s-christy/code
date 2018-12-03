@@ -74,15 +74,22 @@ std::vector<unsigned int> snapshot(int pid,std::vector<std::pair<unsigned long,u
 	for(int i=0;i<addresses.size();i++){
 		len+=addresses[0].second-addresses[0].first;
 	}
+	int limit=len/100;
+	len=limit;
 	ret=std::vector<unsigned int>(len);
 	unsigned long index=0;
 	for(int j=0;j<addresses.size();j++){
 		for(unsigned long i=addresses[j].first;i<addresses[j].second;i++){
 			ret[index]=ptrace(PTRACE_PEEKDATA,pid,i,NULL);
 			index++;
-			if(index%100==0)std::cout<<(float)index/(float)len<<'\n';
+			if(index%10000==0)std::cout<<(float)index/(float)len<<"\t\t\r";
+			if(index==limit){
+				std::cout<<'\n';
+				return ret;
+			}
 		}
 	}
+	std::cout<<'\n';
 	return ret;
 }
 
@@ -95,9 +102,6 @@ void different(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<uns
 		}else{
 			snap[i]=snap2[i];
 		}
-		if(snap[i]!=0){
-			std::cout<<snap[i]<<'\t'<<snap2[i]<<'\n';
-		}
 	}
 }
 
@@ -107,9 +111,6 @@ void same(std::vector<unsigned int>& snap,int pid,std::vector<std::pair<unsigned
 	for(int i=0;i<snap.size();i++){
 		if(snap[i]!=snap2[i]){
 			snap[i]=0;
-		}
-		if(snap[i]!=0){
-			std::cout<<snap[i]<<'\t'<<snap2[i]<<'\n';
 		}
 	}
 }
@@ -179,6 +180,13 @@ int main(){
 			std::cout<<total.size()<<'\n';
 
 
+		}
+		else if(option=='v'){//view
+			for(int i=0;i<snap.size();i++){
+				if(snap[i]!=0){
+					std::cout<<snap[i]<<'\n';
+				}
+			}
 		}
 		int count=0;
 		for(int i=0;i<snap.size();i++)
